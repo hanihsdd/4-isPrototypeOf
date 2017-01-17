@@ -1,0 +1,195 @@
+<script src="simpletest.js"></script>
+<script>
+/* ==========================================================================
+   #PLANNING
+   ========================================================================== */
+
+/**
+ * TASK:
+ * https://github.com/gordonmzhu/beasts/issues/4
+ * 
+ * Write a function, isPrototypeOf, that works just like Object.prototype.isPrototypeOf. Since your solution will be called as a function rather than a method, the way you use it will be slightly different, but the outcome should be the same.
+ */
+
+
+/** 
+ * NATIVE METHOD:
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/isPrototypeOf
+ *
+ * The isPrototypeOf() method checks if an object exists in another object's prototype chain.
+ *
+ * Object.prototype.isPrototypeOf(object)
+ */
+
+
+/**
+ * BEHAVIOUR:
+ * == Return value: 
+ * boolean that evaluates whether `Object.prototype` is a prototype of `object`
+ *
+ * == Errors: 
+ * If `Object.prototype' is undefined or null, throw TypeError
+ */
+
+
+ /**
+  * OUR FUNCTION:
+  * 
+  * function isPrototypeOf(protoObj, obj) {};
+  *
+  * @param {Object} protoObj - our prototype object
+  *
+  * @param {Object} obj - our comparison object. We check to see if this object has objectPrototype as it's prototype.
+  */
+
+
+
+
+
+/* ==========================================================================
+   #COMPARING BEHAVIOUR OF NATIVE METHOD AND OUR FUNCTION
+   ========================================================================== */
+
+var dog = {
+	fetch: function() {
+		console.log('fetch');
+	}
+};
+
+var cat = {
+	scratch: function() {
+		console.log('Scratch!!!');
+	}
+};
+
+var myCat = Object.create(cat);
+
+var myDog = Object.create(dog);
+
+var empty = Object.create(null);
+
+console.log(dog.isPrototypeOf(myDog)); // True
+console.log(isPrototypeOf(dog, myDog)); // True
+
+console.log(dog.isPrototypeOf(empty)); // False
+console.log(isPrototypeOf(dog, empty)); // False
+
+console.log(cat.isPrototypeOf(myDog)); // False
+console.log(isPrototypeOf(cat, myDog)); // False
+
+console.log(Object.prototype.isPrototypeOf(myDog)); // True
+console.log(isPrototypeOf(Object.prototype, myDog)); // True
+
+
+
+
+
+/* ==========================================================================
+   #APP
+   ========================================================================== */
+
+console.log('App starts here');
+
+function isPrototypeOf(protoObj, obj) {
+
+	if (protoObj === undefined || protoObj === null) {
+		throw new TypeError('TypeError: Cannot read property ' + protoObj);
+	}
+
+	// Get prototype of obj to compare with our protoObj
+	var objPrototype = Object.getPrototypeOf(obj);
+
+	// While objPrototype is NOT null, iterate through our prototype chain and compare with objPrototype
+	while (objPrototype !== null) {
+		if (protoObj === objPrototype) {
+			return true;
+		} 
+
+		// If there is no match, we iterate through to the next prototype in the chain, until it reaches null
+		objPrototype = Object.getPrototypeOf(objPrototype);
+	}
+
+	// If there is no match across the entire prototype chain, return false
+	return false;
+
+};
+
+
+
+
+
+/* ==========================================================================
+   #TESTS
+   ========================================================================== */
+
+tests({
+  'It should take in two parameters, compare them, and return a boolean': function() {
+
+  	var obj = {};
+  	var obj2 = {};
+
+  	eq(isPrototypeOf(obj, obj2), Boolean());
+  },
+
+
+  'It should get the prototype of obj and compare with protoObj': function() {
+
+  	var cat = {
+  		scratch: function() {
+  			console.log('Scratch!!!');
+  		}
+  	};
+
+  	var myCat = Object.create(cat);
+
+  	eq(isPrototypeOf(cat, myCat), true);
+  	eq(isPrototypeOf(dog, myCat), false);
+  },
+
+
+  'It should compare protoObj through the entire prototype chain of obj': function() {
+
+		function Foo() {}
+		function Bar() {}
+		function Baz() {}
+
+		Bar.prototype = Object.create(Foo.prototype);
+		Baz.prototype = Object.create(Bar.prototype);
+
+		var baz = new Baz();
+		console.log(baz);
+
+		eq(isPrototypeOf(Baz.prototype, baz), true);
+		eq(isPrototypeOf(Bar.prototype, baz), true);
+  },
+
+
+  'It should accept Object.prototype as protoObj and return true': function() {
+
+  	var cat = {
+  		scratch: function() {
+  			console.log('Scratch!!!');
+  		}
+  	};
+
+  	var myCat = Object.create(cat);
+  	
+  	eq(isPrototypeOf(Object.prototype, myCat), true);
+  },
+
+
+  'It should throw a TypeError if protoObj is undefined or null': function() {
+
+  	var obj = {};
+
+  	try {
+  		isPrototypeOf(undefined, obj);
+  	} catch(e) {
+  		isTypeError = (e instanceof TypeError);
+  	}
+
+  	eq(isTypeError, true);
+  }
+
+});
+</script>
